@@ -1,3 +1,53 @@
+# CleanSwipe - Laundry Demo (Next.js + Prisma + Postgres)
+
+This project is a demo laundry app adapted to use a local PostgreSQL database via Prisma (no Firebase).
+
+Key points:
+- Database: PostgreSQL on localhost port `55432` (you can change the URL via `DATABASE_URL`).
+- ORM: Prisma. Schema is in `prisma/schema.prisma`.
+- API: Next.js Route Handlers under `app/api/*` using the Prisma client in `lib/prisma.ts`.
+- Frontend: Client component mount at `app/components/AppClient.tsx` and `app/page.tsx` loads it.
+
+Getting started (local development):
+
+1. Start a Postgres instance listening on port 55432. Example (Docker):
+
+```powershell
+docker run --name laundry-postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_USER=postgres -e POSTGRES_DB=laundrydb -p 55432:5432 -d postgres:15
+```
+
+2. Set `DATABASE_URL` in your environment (PowerShell example):
+
+```powershell
+$env:DATABASE_URL = "postgresql://postgres:postgres@localhost:55432/laundrydb"
+```
+
+3. Install dependencies:
+
+```powershell
+# from project root
+npm install
+```
+
+4. Generate Prisma client and run migrations:
+
+```powershell
+npx prisma generate
+npx prisma migrate dev --name init
+# optionally open Studio
+npx prisma studio
+```
+
+5. Run the app:
+
+```powershell
+npm run dev
+```
+
+Notes and next steps:
+- The frontend uses a lightweight local identity (stored in `localStorage`) for demo purposes.
+- The API endpoints are under `/api/shops` and `/api/orders`.
+- For production you should add proper auth, validation, and tests.
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started

@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  PROVIDER
+}
+
+enum OrderStatus {
+  Pending_Pickup
+  In_Transit_to_Shop
+  Arrived_at_Shop_Queuing
+  Washing
+  Washing_Complete_Start_Drying
+  Drying_Complete_Start_Packing
+  Out_for_Delivery
+  Completed
+  Cancelled
+}
+
+model User {
+  id        String   @id @default(uuid())
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+
+  // one-to-one optional: a user may own a single shop
+  shop      Shop?    @relation("ShopOwner")
+
+  // orders placed by this user
+  orders    Order[]  @relation("user_orders")
+}
+
+model Shop {
+  id          String   @id @default(uuid())
+  ownerId     String   @unique
+  // relation to owner user
+  owner       User     @relation("ShopOwner", fields: [ownerId], references: [id])
+
+  name        String
+  address     String
+  description String?
+  pricePerKg  Float    @default(5.0)
+  ratingSum   Int      @default(0)
+  ratingCount Int      @default(0)
+  location    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // orders fulfilled by this shop/provider
+  orders      Order[]  @relation("shop_order")
+}
+
+model Order {
+  id           String      @id @default(uuid())
+
+  // foreign keys
+  userId       String
+  shopId   String
+
+  // relations
+  user         User        @relation("user_orders", fields: [userId], references: [id])
+  shop     Shop        @relation("shop_order", fields: [shopId], references: [id])
+
+  providerName String?
+  details      String?
+  weightKg     Int?        @default(5)
+  pricePerKg   Float?      @default(5.0)
+  status       OrderStatus @default(Pending_Pickup)
+  pickupAddress String?
+  rating       Int?
+  ratingComment String?
+  ratedAt      DateTime?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@index([userId])
+  @@index([shopId])
+}
