@@ -22,13 +22,25 @@ export async function POST(req: Request) {
 
     // Ensure owner user exists (avoid FK violation). If user doesn't exist, create as PROVIDER.
     try {
-      await prisma.user.upsert({
-        where: { id: ownerId },
-        update: {},
-        create: { id: ownerId, role: 'PROVIDER' },
-      });
+      const existing = await prisma.user.findUnique({ where: { id: ownerId } });
+      if (!existing) {
+        const placeholderUsername = `provider_${ownerId.slice(0, 8)}`;
+        const placeholderEmail = `${ownerId}@no-reply.local`;
+
+        await prisma.user.create({
+          data: {
+            id: ownerId,
+            role: 'PROVIDER',
+            username: placeholderUsername,
+            email: placeholderEmail,
+            // It's recommended to set a proper password in production; use an empty string
+            // or a random value here to satisfy the schema. Adjust as needed.
+            password: '',
+          },
+        });
+      }
     } catch (e) {
-      console.warn('Could not upsert owner user', ownerId, e);
+      console.warn('Could not ensure owner user exists', ownerId, e);
     }
 
     const upserted = await prisma.shop.upsert({
