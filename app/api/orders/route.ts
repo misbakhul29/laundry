@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { Prisma } from '@prisma/client/wasm';
+import { OrderStatus, Prisma } from '@prisma/client/wasm';
 
 // Helper to map next status
 const NEXT_STATUS: Record<string, string | null> = {
@@ -93,7 +93,7 @@ export async function PATCH(req: Request) {
     if (action === 'advance') {
       const next = NEXT_STATUS[order.status];
       if (!next) return NextResponse.json({ error: 'No next status' }, { status: 400 });
-      const updated = await prisma.order.update({ where: { id: orderId }, data: { status: next } });
+      const updated = await prisma.order.update({ where: { id: orderId }, data: { status: next as OrderStatus } });
       return NextResponse.json(updated);
     }
 

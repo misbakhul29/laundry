@@ -2,12 +2,12 @@
 
 import dynamic from 'next/dynamic';
 
-const AppClient = dynamic(() => import('./components/AppClient'), { ssr: false });
+const LandingPage = dynamic(() => import('./landing/page'), { ssr: false });
 
 export default function Home() {
   return (
     <div className=''>
-      <AppClient />
+      <LandingPage />
     </div>
   );
 }
