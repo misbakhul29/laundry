@@ -1,9 +1,17 @@
-import dynamic from 'next/dynamic';
+import AuthPage from './page.client';
 
-const AuthPage = dynamic(() => import('./page.client'), { ssr: true });
+export default async function Auth(props: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
+  const searchParams = await props.searchParams;
+  const keys = Object.keys(searchParams);
+  
+  const firstKey = keys[0];
+  const firstValue = searchParams[firstKey];
+  
+  const token = (firstValue && firstValue !== '') 
+    ? (Array.isArray(firstValue) ? firstValue[0] : firstValue) 
+    : firstKey;
 
-const Auth = () => {
-  return <AuthPage />;
+  return <AuthPage token={token || undefined} />;
 }
-
-export default Auth;

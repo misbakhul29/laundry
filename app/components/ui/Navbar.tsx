@@ -1,12 +1,13 @@
 'use client';
 
-import { IconHome, IconWashHand, IconSettings, IconUser } from "@tabler/icons-react";
+import { IconHome, IconWashHand, IconSettings, IconUser, IconWallet } from "@tabler/icons-react";
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, LayoutGroup } from 'framer-motion';
 
 const navMenu = [
     { label: 'Home', Icon: IconHome, href: '/dashboard' },
     { label: 'Order', Icon: IconWashHand, href: '/order' },
+    { label: 'Payments', Icon: IconWallet, href: '/payments' },
     { label: 'Profile', Icon: IconUser, href: '/profiles' },
     { label: 'Settings', Icon: IconSettings, href: '/settings' },
 ];

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Rubik_Marker_Hatch } from "next/font/google";
 import "./globals.css";
 import { metadata as appMetadata } from './metadata'
-import Providers from './components/provider/Providers'
+import { BubbleBackground } from "@/components/animate-ui/components/backgrounds/bubble";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,7 +32,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${geistMarkerHatch.variable} antialiased flex items-center justify-center min-h-screen bg-gray-100 text-gray-900`}
       >
-        {children}
+        <div className="relative overflow-hidden container mx-auto w-full md:max-w-md flex flex-col items-center justify-end h-screen text-white">
+          <BubbleBackground className="absolute top-0 left-0 -z-10 w-full h-full" />
+            {children}
+        </div>
       </body>
     </html>
   );
