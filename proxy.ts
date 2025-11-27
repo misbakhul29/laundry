@@ -29,9 +29,23 @@ export function proxy(req: NextRequest) {
     'https://laundry.misbakhul.my.id',
   ].filter(Boolean))
 
+  // Also allow when the request Host header matches one of our allowed origins.
+  // This covers requests that don't include Origin/Referer (server-side or some proxied requests).
+  const allowedHosts = new Set(Array.from(allowedOrigins).map(o => {
+    try {
+      return new URL(o).host
+    } catch (e) {
+      // Fallback: strip protocol if URL parsing fails
+      return o.replace(/^https?:\/\//, '')
+    }
+  }))
+
+  const host = req.headers.get('host') || req.nextUrl?.host || ''
+  const isHostAllowed = host && Array.from(allowedHosts).some(h => h && host === h)
+
   const isOriginAllowed = Array.from(allowedOrigins).some(o => o && (origin.startsWith(o) || referer.startsWith(o)))
 
-  if (isOriginAllowed) {
+  if (isOriginAllowed || isHostAllowed) {
     return NextResponse.next()
   }
 
@@ -39,6 +53,12 @@ export function proxy(req: NextRequest) {
     status: 403,
     headers: { 'Content-Type': 'application/json' },
   })
+}
+
+// Export a named `middleware` alias to help Next.js pick this up where expected.
+// Some setups expect an exported `middleware` function in middleware files.
+export function middleware(req: NextRequest) {
+  return proxy(req)
 }
 
 export const config = {
