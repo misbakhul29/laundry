@@ -48,9 +48,12 @@ jobs:
           cp -r prisma deploy/
           cp package.json deploy/
           cp package-lock.json deploy/
+          cp prisma.config.ts deploy/ 2>/dev/null || :
           cp next.config.js deploy/ 2>/dev/null || :
           cp next.config.mjs deploy/ 2>/dev/null || :
           cp .env.production deploy/.env.production
+          # Also provide a plain .env for Prisma and other tools that expect .env
+          cp .env.production deploy/.env
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           NODE_ENV: production
