@@ -37,9 +37,14 @@ jobs:
       
       - name: Create deployment package
         run: |
+          # Ensure Prisma client is generated on the runner so it doesn't need generating on the VPS
+          npx prisma generate
+          
           mkdir -p deploy
           cp -r .next deploy/
           cp -r public deploy/ 2>/dev/null || :
+          # Include installed production node modules so VPS doesn't need to install or build
+          cp -r node_modules deploy/ 2>/dev/null || :
           cp -r prisma deploy/
           cp package.json deploy/
           cp package-lock.json deploy/
@@ -77,14 +82,8 @@ jobs:
             
             # Masuk ke folder project
             cd /var/www/${{ secrets.PROJECT_NAME }}
-            
-            # Install production dependencies saja
-            npm ci --omit=dev
 
-            # Generate Prisma Client
-            npx prisma generate
-            
-            # Jalankan migration
+            # Jalankan migration (prisma binary is included in node_modules packaged from GitHub runner)
             npx prisma migrate deploy --schema=./prisma/schema.prisma
             
             # Restart aplikasi dengan PM2
