@@ -51,7 +51,7 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT }}
           source: "deploy/*"
-          target: "/var/www/namaproject-temp"
+          target: "/var/www/${{ secrets.PROJECT_NAME }}-temp"
           strip_components: 1
       
       - name: Restart Application
@@ -63,22 +63,22 @@ jobs:
           port: ${{ secrets.VPS_PORT }}
           script: |
             # Backup folder lama (opsional)
-            if [ -d "/var/www/namaproject" ]; then
-              rm -rf /var/www/namaproject-backup
-              mv /var/www/namaproject /var/www/namaproject-backup
+            if [ -d "/var/www/${{ secrets.PROJECT_NAME }}" ]; then
+              rm -rf /var/www/${{ secrets.PROJECT_NAME }}-backup
+              mv /var/www/${{ secrets.PROJECT_NAME }} /var/www/${{ secrets.PROJECT_NAME }}-backup
             fi
             
             # Pindahkan deployment baru
-            mv /var/www/namaproject-temp /var/www/namaproject
+            mv /var/www/${{ secrets.PROJECT_NAME }}-temp /var/www/${{ secrets.PROJECT_NAME }}
             
             # Masuk ke folder project
-            cd /var/www/namaproject
+            cd /var/www/${{ secrets.PROJECT_NAME }}
             
             # Install production dependencies saja
             npm ci --production --ignore-scripts
             
             # Restart aplikasi dengan PM2
-            pm2 restart namaproject || pm2 start npm --name "namaproject" -- start
+            pm2 restart ${{ secrets.PROJECT_NAME }} || pm2 start npm --name "${{ secrets.PROJECT_NAME }}" -- start
             
             # Save PM2 configuration
             pm2 save
