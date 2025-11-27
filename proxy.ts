@@ -26,6 +26,7 @@ export function proxy(req: NextRequest) {
     APP_URL,
     'http://localhost:3000',
     'http://127.0.0.1:3000',
+    'https://laundry.misbakhul.my.id',
   ].filter(Boolean))
 
   const isOriginAllowed = Array.from(allowedOrigins).some(o => o && (origin.startsWith(o) || referer.startsWith(o)))
