@@ -1,5 +1,5 @@
+import { Role } from '@/lib/generated/prisma/enums';
 import prisma from '@/lib/prisma';
-import { Role } from '@prisma/client';
 import bcrypt from "bcrypt";
 
 export async function POST(req: Request) {

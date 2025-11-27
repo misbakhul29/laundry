@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { OrderStatus, Prisma } from '@prisma/client/wasm';
+import { OrderStatus } from '@/lib/generated/prisma/client';
+import { Prisma } from '@/lib/generated/prisma/browser';
 
 // Helper to map next status
 const NEXT_STATUS: Record<string, string | null> = {
@@ -100,40 +101,7 @@ export async function PATCH(req: Request) {
     // Submit rating
     if (action === 'rate') {
       if (typeof rating !== 'number') return NextResponse.json({ error: 'rating numeric required' }, { status: 400 });
-
-    interface RatingUpdatedOrder {
-      id: string;
-      shopId: string;
-      rating?: number | null;
-      ratingComment?: string | null;
-      ratedAt?: Date | null;
-      [key: string]: unknown;
-    }
-
-    interface ShopAggregate {
-      id: string;
-      ratingSum?: number | null;
-      ratingCount?: number | null;
-    }
-
-    const updated: RatingUpdatedOrder = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
-      const u = await tx.order.update({
-        where: { id: orderId },
-        data: { rating, ratingComment, ratedAt: new Date() },
-      });
-
-      // Update shop aggregated rating
-      const shop = (await tx.shop.findUnique({ where: { id: u.shopId } })) as ShopAggregate | null;
-      if (shop) {
-        await tx.shop.update({
-        where: { id: shop.id },
-        data: { ratingSum: (shop.ratingSum || 0) + rating, ratingCount: (shop.ratingCount || 0) + 1 },
-        });
-      }
-
-      return u;
-    });
-
+      const updated = await prisma.order.update({ where: { id: orderId }, data: { rating, ratingComment: ratingComment || '' } });
       return NextResponse.json(updated);
     }
 
