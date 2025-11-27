@@ -1,0 +1,84 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '24'
+          cache: 'npm'
+      
+      - name: Create .env file
+        run: |
+          touch .env.production
+          echo "${{ secrets.ENV_FILE }}" > .env.production
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build application
+        run: npm run build
+        env:
+          NODE_ENV: production
+      
+      - name: Create deployment package
+        run: |
+          mkdir -p deploy
+          cp -r .next deploy/
+          cp -r public deploy/ 2>/dev/null || :
+          cp package.json deploy/
+          cp package-lock.json deploy/
+          cp next.config.js deploy/ 2>/dev/null || :
+          cp next.config.mjs deploy/ 2>/dev/null || :
+          cp .env.production deploy/.env.production
+      
+      - name: Deploy to VPS
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          source: "deploy/*"
+          target: "/var/www/namaproject-temp"
+          strip_components: 1
+      
+      - name: Restart Application
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          script: |
+            # Backup folder lama (opsional)
+            if [ -d "/var/www/namaproject" ]; then
+              rm -rf /var/www/namaproject-backup
+              mv /var/www/namaproject /var/www/namaproject-backup
+            fi
+            
+            # Pindahkan deployment baru
+            mv /var/www/namaproject-temp /var/www/namaproject
+            
+            # Masuk ke folder project
+            cd /var/www/namaproject
+            
+            # Install production dependencies saja
+            npm ci --production --ignore-scripts
+            
+            # Restart aplikasi dengan PM2
+            pm2 restart namaproject || pm2 start npm --name "namaproject" -- start
+            
+            # Save PM2 configuration
+            pm2 save
