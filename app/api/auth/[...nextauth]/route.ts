@@ -15,7 +15,7 @@ export interface ExtendedSession extends Session {
 }
 
 const handler = NextAuth({
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: process.env.NEXT_AUTH_SECRET,
   adapter: PrismaAdapter(prisma),
   session: {
     strategy: "jwt",

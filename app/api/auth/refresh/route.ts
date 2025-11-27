@@ -55,7 +55,7 @@ export async function POST(request: Request) {
       refreshToken: newRefreshToken,
     } as any;
 
-    const jwtSecret = process.env.NEXT_AUTH_SECRET || process.env.NEXTAUTH_SECRET;
+    const jwtSecret = process.env.NEXT_AUTH_SECRET || process.env.NEXT_AUTH_SECRET;
     const tokenJwt = jwt.sign(tokenPayload, jwtSecret as string, { expiresIn: '30d' });
 
     const res = NextResponse.json({ ok: true, accessToken: newAccessToken, refreshToken: newRefreshToken, expiresAt: newExpiresAt.toISOString() });
