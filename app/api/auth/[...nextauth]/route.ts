@@ -14,18 +14,18 @@ export interface ExtendedSession extends Session {
   user: User;
 }
 // Derive a single secret value from multiple possible env var names so the
-// app works regardless of whether the deploy sets `NEXT_AUTH_SECRET` or
+// app works regardless of whether the deploy sets `NEXTAUTH_SECRET` or
 // `NEXT_AUTH_SECRET` (or in some setups an internal secret is used).
-const NEXT_AUTH_SECRET =
-  process.env.NEXT_AUTH_SECRET || process.env.NEXT_AUTH_SECRET || process.env.NEXT_INTERNAL_API_SECRET || '';
+const NEXTAUTH_SECRET =
+  process.env.NEXTAUTH_SECRET || process.env.NEXT_AUTH_SECRET || process.env.NEXT_INTERNAL_API_SECRET || '';
 
-if (!NEXT_AUTH_SECRET) {
+if (!NEXTAUTH_SECRET) {
   // In production NextAuth will throw if no secret exists; log here for easier debugging.
-  console.warn('[next-auth] No NEXT_AUTH_SECRET / NEXT_AUTH_SECRET / NEXT_INTERNAL_API_SECRET found in env');
+  console.warn('[next-auth] No NEXTAUTH_SECRET / NEXT_AUTH_SECRET / NEXT_INTERNAL_API_SECRET found in env');
 }
 
 const handler = NextAuth({
-  secret: NEXT_AUTH_SECRET || undefined,
+  secret: NEXTAUTH_SECRET || undefined,
   adapter: PrismaAdapter(prisma),
   session: {
     strategy: "jwt",
@@ -70,9 +70,9 @@ const handler = NextAuth({
       if (user) {
         token.user = user;
 
-        const secret = NEXT_AUTH_SECRET;
+        const secret = NEXTAUTH_SECRET;
         if (!secret) {
-          console.error('NEXT_AUTH_SECRET (or fallback) is not defined');
+          console.error('NEXTAUTH_SECRET (or fallback) is not defined');
           return token;
         }
 
@@ -120,10 +120,15 @@ const handler = NextAuth({
       return token;
     },
     async session({ session, token }) {
+      if (!token || !token.accessToken) {
+        // No token present on the session request — treat as unauthorized.
+        throw new Error('No access token');
+      }
+
       if (token.accessToken) {
         try {
-          const secret = NEXT_AUTH_SECRET;
-          if (!secret) throw new Error('NEXT_AUTH_SECRET (or fallback) is not defined');
+          const secret = NEXTAUTH_SECRET;
+          if (!secret) throw new Error('NEXTAUTH_SECRET (or fallback) is not defined');
 
           jwt.verify(token.accessToken as string, secret);
 
