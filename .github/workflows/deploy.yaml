@@ -76,6 +76,15 @@ jobs:
             
             # Install production dependencies saja
             npm i --ignore-scripts --legacy-peer-deps
+
+            # Install Prisma CLI (diperlukan untuk migration)
+            npm install prisma --save-dev
+            
+            # Generate Prisma Client
+            npx prisma generate
+            
+            # Jalankan migration
+            npx prisma migrate deploy
             
             # Restart aplikasi dengan PM2
             pm2 restart ${{ secrets.PROJECT_NAME }} || pm2 start npm --name "${{ secrets.PROJECT_NAME }}" -- start
