@@ -77,9 +77,6 @@ jobs:
             # Install production dependencies saja
             npm i --ignore-scripts --legacy-peer-deps
 
-            # Install Prisma CLI (diperlukan untuk migration)
-            npm install prisma --save-dev
-            
             # Generate Prisma Client
             npx prisma generate
             
