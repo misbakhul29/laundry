@@ -51,7 +51,10 @@ jobs:
           cp next.config.js deploy/ 2>/dev/null || :
           cp next.config.mjs deploy/ 2>/dev/null || :
           cp .env.production deploy/.env.production
-      
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          NODE_ENV: production
+                
       - name: Deploy to VPS
         uses: appleboy/scp-action@master
         with:
