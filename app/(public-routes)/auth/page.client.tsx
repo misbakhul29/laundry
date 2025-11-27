@@ -9,7 +9,7 @@ import { Loader } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { decryptToken } from "@/app/actions/token";
 import { signIn, useSession } from "next-auth/react";
-import type { Role } from "@prisma/client";
+import { Role } from "@/lib/generated/prisma/enums";
 
 const providers = [
   { name: 'Google', icon: IconBrandGoogleFilled, color: '#4285F4' },

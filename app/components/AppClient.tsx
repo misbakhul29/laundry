@@ -4,7 +4,8 @@ import React, { useEffect, useState, useMemo, useCallback, use } from 'react';
 import { apiFetch, v4, demoLocations } from './lib';
 import ShopManager from './ShopManager';
 import RatingForm from './RatingForm';
-import type { Order, OrderStatus, Shop, User } from '@prisma/client';
+import { OrderStatus } from '@/lib/generated/prisma/enums';
+import { Order, Shop, User } from '@/lib/generated/prisma/client';
 
 const STATUS_MAP: Record<OrderStatus, { icon: string; label: string; color: string; nextAction: string | null }> = {
     Pending_Pickup: { icon: '📦', label: 'Pending Pickup', color: 'bg-yellow-100 text-yellow-800', nextAction: 'Confirm Pickup' },
@@ -43,6 +44,10 @@ export default function AppClient() {
     const [selectedShop, setSelectedShop] = useState<Shop | null>(null);
     const [orderWeight, setOrderWeight] = useState<number>(5);
     const [modalOrder, setModalOrder] = useState<Order | null>(null);
+
+    const getStatusMeta = (s: Order['status']) => {
+        return STATUS_MAP[s as OrderStatus];
+    };
 
     // Ensure user exists in DB and load user record
     async function loadUserRecord(id: string) {
@@ -283,7 +288,7 @@ export default function AppClient() {
                                                 <div className="font-bold">{o.providerName || 'Unknown'}</div>
                                                 <div className="text-sm text-gray-500">{o.details}</div>
                                             </div>
-                                            <div className="text-xs">{STATUS_MAP[o.status]?.icon} {STATUS_MAP[o.status]?.label}</div>
+                                            <div className="text-xs">{getStatusMeta(o.status)?.icon} {getStatusMeta(o.status)?.label}</div>
                                         </div>
                                         <div className="mt-2 flex justify-between items-center">
                                             <div className="text-indigo-600 font-semibold">Total: ${(Number(o.pricePerKg || 5) * Number(o.weightKg || 5)).toFixed(2)}</div>
@@ -304,7 +309,7 @@ export default function AppClient() {
                                                 <div className="font-bold">{o.providerName || 'Unknown'}</div>
                                                 <div className="text-sm text-gray-500">{o.details}</div>
                                             </div>
-                                            <div className="text-xs">{STATUS_MAP[o.status]?.icon} {STATUS_MAP[o.status]?.label}</div>
+                                            <div className="text-xs">{getStatusMeta(o.status)?.icon} {getStatusMeta(o.status)?.label}</div>
                                         </div>
                                         <div className="mt-2 flex justify-between items-center">
                                             <div className="text-indigo-600 font-semibold">Total: ${(Number(o.pricePerKg || 5) * Number(o.weightKg || 5)).toFixed(2)}</div>
@@ -341,7 +346,7 @@ export default function AppClient() {
                                         <div key={o.id} className="p-4 bg-white rounded shadow">
                                             <div className="flex justify-between">
                                                 <div>User: {o.userId.substring(0, 8)}</div>
-                                                <div className="text-xs">{STATUS_MAP[o.status]?.icon} {STATUS_MAP[o.status]?.label}</div>
+                                                <div className="text-xs">{getStatusMeta(o.status)?.icon} {getStatusMeta(o.status)?.label}</div>
                                             </div>
                                             <div className="mt-2 flex justify-between items-center">
                                                 <div className="text-xs text-gray-600">{o.details} @ {o.pickupAddress}</div>
@@ -365,7 +370,7 @@ export default function AppClient() {
                                         <div key={o.id} className="p-4 bg-white rounded shadow">
                                             <div className="flex justify-between">
                                                 <div>Order: {o.id.substring(0, 8)}</div>
-                                                <div className='text-xs'>{STATUS_MAP[o.status]?.icon} {STATUS_MAP[o.status]?.label}</div>
+                                                <div className='text-xs'>{getStatusMeta(o.status)?.icon} {getStatusMeta(o.status)?.label}</div>
                                             </div>
                                             <div className="mt-2 flex justify-between">
                                                 <div className="text-xs text-gray-600">{o.details}</div>
@@ -387,7 +392,7 @@ export default function AppClient() {
                                         <div key={o.id} className="p-4 bg-white rounded shadow">
                                             <div className="flex justify-between">
                                                 <div>Order: {o.id.substring(0, 8)}</div>
-                                                <div className='text-xs'>{STATUS_MAP[o.status]?.icon} {STATUS_MAP[o.status]?.label}</div>
+                                                <div className='text-xs'>{getStatusMeta(o.status)?.icon} {getStatusMeta(o.status)?.label}</div>
                                             </div>
                                             <div className="mt-2 flex justify-between">
                                                 <div className="text-xs text-gray-600">{o.details}</div>

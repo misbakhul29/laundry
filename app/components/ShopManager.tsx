@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { apiFetch, demoLocations, v4 } from './lib';
-import type { Shop } from '@prisma/client';
+import { Shop } from '@/lib/generated/prisma/client';
 
 type Props = {
   ownerId: string;
