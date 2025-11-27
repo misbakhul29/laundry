@@ -26,11 +26,14 @@ jobs:
       
       - name: Install dependencies
         run: npm i
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
       
       - name: Build application
         run: npm run build
         env:
           NODE_ENV: production
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
       
       - name: Create deployment package
         run: |
