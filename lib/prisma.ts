@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "./generated/prisma/client";
 
 declare global {
   // allow global `var` in dev to persist PrismaClient across module reloads
