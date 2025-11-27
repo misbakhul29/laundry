@@ -25,7 +25,7 @@ jobs:
           echo "${{ secrets.ENV_FILE }}" > .env.production
       
       - name: Install dependencies
-        run: npm ci --legasy-peer-deps
+        run: npm i --legasy-peer-deps
       
       - name: Build application
         run: npm run build
