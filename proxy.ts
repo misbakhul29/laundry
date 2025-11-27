@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-const SERVER_SECRET = process.env.INTERNAL_API_SECRET || ''
+const SERVER_SECRET = process.env.NEXT_INTERNAL_API_SECRET || ''
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || ''
 
 export function proxy(req: NextRequest) {

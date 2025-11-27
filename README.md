@@ -90,27 +90,27 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 This repository includes a `middleware.ts` that protects routes under `/api/*` so that requests are allowed only when one of the following is true:
 
 - The request `Origin` or `Referer` header matches the app origin (value set in `NEXT_PUBLIC_APP_URL`), or
-- The request contains the internal header `x-internal-secret` with a value equal to `INTERNAL_API_SECRET` (server-to-server calls).
+- The request contains the internal header `x-internal-secret` with a value equal to `NEXT_INTERNAL_API_SECRET` (server-to-server calls).
 
 This approach lets your Next.js frontend (browser) call APIs normally when served from the same origin, and also lets server-side code (server components / API routes) call the API by attaching a secret header that is never exposed to the browser.
 
 Environment variables to configure:
 
 - `NEXT_PUBLIC_APP_URL` — the public URL of your app (example: `https://example.com` or `http://localhost:3000` for dev). This is used to allow browser-originated requests.
-- `INTERNAL_API_SECRET` — a server-only secret used by server-side fetches to identify internal requests. DO NOT prefix this with `NEXT_PUBLIC_` and DO NOT commit it.
+- `NEXT_INTERNAL_API_SECRET` — a server-only secret used by server-side fetches to identify internal requests. DO NOT prefix this with `NEXT_PUBLIC_` and DO NOT commit it.
 
 Server-side fetch example (use only from server code; e.g., in an API route or server component):
 
 ```powershell
 # PowerShell example, environment variable is available on the server
-$env:INTERNAL_API_SECRET = "your-secret-here"
+$env:NEXT_INTERNAL_API_SECRET = "your-secret-here"
 
 # Node / server-side fetch example (inside a server component or API route)
 await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/orders`, {
 	method: 'POST',
 	headers: {
 		'Content-Type': 'application/json',
-		'x-internal-secret': process.env.INTERNAL_API_SECRET,
+		'x-internal-secret': process.env.NEXT_INTERNAL_API_SECRET,
 	},
 	body: JSON.stringify({ /* payload */ }),
 })
@@ -119,5 +119,5 @@ await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/orders`, {
 Notes and caveats:
 
 - This middleware is a defense-in-depth mechanism. Determined attackers can spoof headers; for strong security you should still require proper authentication (sessions, JWTs) and server-side authorization checks inside your API handlers.
-- The `INTERNAL_API_SECRET` mechanism is intended for server-to-server calls originating from your Next.js server (server components or API routes). Never expose that secret in client-side code.
+- The `NEXT_INTERNAL_API_SECRET` mechanism is intended for server-to-server calls originating from your Next.js server (server components or API routes). Never expose that secret in client-side code.
 
