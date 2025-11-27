@@ -85,7 +85,7 @@ jobs:
             npx prisma generate
             
             # Jalankan migration
-            npx prisma migrate deploy
+            npx prisma migrate deploy --schema=./prisma/schema.prisma
             
             # Restart aplikasi dengan PM2
             pm2 restart ${{ secrets.PROJECT_NAME }} || pm2 start npm --name "${{ secrets.PROJECT_NAME }}" -- start
