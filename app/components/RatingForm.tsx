@@ -1,4 +1,4 @@
-import { Order } from '@prisma/client/wasm';
+import type { Order } from '@prisma/client';
 import React, { useState } from 'react';
 
 type Props = {

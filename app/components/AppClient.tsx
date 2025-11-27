@@ -4,7 +4,7 @@ import React, { useEffect, useState, useMemo, useCallback, use } from 'react';
 import { apiFetch, v4, demoLocations } from './lib';
 import ShopManager from './ShopManager';
 import RatingForm from './RatingForm';
-import { Order, OrderStatus, Shop, User } from '@prisma/client/wasm';
+import type { Order, OrderStatus, Shop, User } from '@prisma/client';
 
 const STATUS_MAP: Record<OrderStatus, { icon: string; label: string; color: string; nextAction: string | null }> = {
     Pending_Pickup: { icon: '📦', label: 'Pending Pickup', color: 'bg-yellow-100 text-yellow-800', nextAction: 'Confirm Pickup' },
