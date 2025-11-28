@@ -8,25 +8,30 @@ const STORAGE_TIME_KEY = "laundryReminderTime";
 const STORAGE_ENABLED_KEY = "laundryReminderEnabled";
 
 export default function Reminder() {
-    const [time, setTime] = useState<string>("09:00");
-    const [enabled, setEnabled] = useState<boolean>(false);
+    const [time, setTime] = useState<string>(() => {
+        try {
+            const v = localStorage.getItem(STORAGE_TIME_KEY);
+            return v ?? "09:00";
+        } catch {
+            return "09:00";
+        }
+    });
+
+    const [enabled, setEnabled] = useState<boolean>(() => {
+        try {
+            const v = localStorage.getItem(STORAGE_ENABLED_KEY);
+            return v === "true";
+        } catch {
+            return false;
+        }
+    });
     const [permission, setPermission] = useState<NotificationPermission>(
         typeof Notification !== "undefined" ? Notification.permission : "default"
     );
     const timerRef = useRef<number | null>(null);
     const { notify } = useNotification();
 
-    // Load saved settings from localStorage on mount
-    useEffect(() => {
-        try {
-            const storedTime = localStorage.getItem(STORAGE_TIME_KEY);
-            const storedEnabled = localStorage.getItem(STORAGE_ENABLED_KEY);
-            if (storedTime) setTime(storedTime);
-            if (storedEnabled) setEnabled(storedEnabled === "true");
-        } catch {
-            // ignore storage errors
-        }
-    }, []);
+    // initial state reads from localStorage synchronously (client-only component)
 
     // Whenever time or enabled changes, persist and (re)schedule
     useEffect(() => {
@@ -194,6 +199,15 @@ export default function Reminder() {
         }
     }
 
+    function handleToggle(checked: boolean) {
+        try {
+            localStorage.setItem(STORAGE_ENABLED_KEY, String(checked));
+            setEnabled(checked);
+        } catch {
+            // ignore storage errors
+        }
+    }
+
     function getNextOccurrenceString() {
         if (!enabled) return "—";
         if (typeof window === "undefined") return "—";
@@ -225,7 +239,7 @@ export default function Reminder() {
                             <input
                                 type="checkbox"
                                 checked={enabled}
-                                onChange={(e) => setEnabled(e.target.checked)}
+                                onChange={(e) => handleToggle(e.target.checked)}
                                 className="w-4 h-4 rounded text-indigo-600 bg-gray-800"
                             />
                             <span className="text-xs text-gray-200">Enabled</span>
@@ -245,7 +259,7 @@ export default function Reminder() {
 
                         <button
                             onClick={handleTest}
-                            className="ml-auto inline-flex items-center gap-2 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded"
+                            className="ml-auto inline-flex items-center gap-2 px-3 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm rounded"
                         >
                             Test
                         </button>
