@@ -1,3 +1,5 @@
+[![Deploy to VPS](https://github.com/misbakhul29/laundry/actions/workflows/deploy.yaml/badge.svg?event=push)](https://github.com/misbakhul29/laundry/actions/workflows/deploy.yaml)
+
 # CleanSwipe - Laundry Demo (Next.js + Prisma + Postgres)
 
 This project is a demo laundry app adapted to use a local PostgreSQL database via Prisma (no Firebase).
