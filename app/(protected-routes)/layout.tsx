@@ -2,7 +2,7 @@
 
 import { BubbleBackground } from "@/components/animate-ui/components/backgrounds/bubble";
 import Providers from "../components/provider/Providers";
-import Navbar from "../components/ui/Navbar";
+import Navbar from "./user/components/Navbar";
 import AuthGuard from "../components/AuthGuard";
 
 export default function PublicRoutesLayout({

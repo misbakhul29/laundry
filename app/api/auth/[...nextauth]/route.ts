@@ -1,11 +1,45 @@
 import NextAuth, { User, Session } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import Google from "next-auth/providers/google";
+import GoogleProvider from "next-auth/providers/google";
+import FacebookProvider from "next-auth/providers/facebook";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcrypt";
 import prisma from "@/lib/prisma";
 import { headers } from "next/headers";
 import jwt from "jsonwebtoken";
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+// --- 1. Helper Function untuk Verifikasi reCAPTCHA ---
+const verifyRecaptcha = async (token: string) => {
+  const secretKey = process.env.NEXT_PUBLIC_RECAPTCHA_SECRET_KEY || '';
+  
+  if (!secretKey) {
+    console.warn("RECAPTCHA_SECRET_KEY is not set! Skipping verification.");
+    return true; // Fallback jika env belum diset (opsional, bisa diganti return false)
+  }
+
+  try {
+    const response = await fetch(
+      `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${token}`,
+      { method: "POST" }
+    );
+    const data = await response.json();
+
+    // Anda bisa mengatur threshold score di sini (0.0 - 1.0)
+    // 0.5 adalah standar umum. Di bawah itu dianggap bot.
+    if (data.success && data.score >= 0.5) {
+      return true;
+    }
+    
+    console.error("reCAPTCHA failed:", data);
+    return false;
+  } catch (error) {
+    console.error("reCAPTCHA connection error:", error);
+    return false;
+  }
+};
 
 // strongly type the session to avoid `any`
 export interface ExtendedSession extends Session {
@@ -13,14 +47,11 @@ export interface ExtendedSession extends Session {
   refreshToken?: string;
   user: User;
 }
-// Derive a single secret value from multiple possible env var names so the
-// app works regardless of whether the deploy sets `NEXTAUTH_SECRET` or
-// `NEXT_AUTH_SECRET` (or in some setups an internal secret is used).
+
 const NEXTAUTH_SECRET =
   process.env.NEXTAUTH_SECRET || process.env.NEXT_AUTH_SECRET || process.env.NEXT_INTERNAL_API_SECRET || '';
 
 if (!NEXTAUTH_SECRET) {
-  // In production NextAuth will throw if no secret exists; log here for easier debugging.
   console.warn('[next-auth] No NEXTAUTH_SECRET / NEXT_AUTH_SECRET / NEXT_INTERNAL_API_SECRET found in env');
 }
 
@@ -31,22 +62,40 @@ const handler = NextAuth({
     strategy: "jwt",
   },
   providers: [
-    // --- Google Login ---
-    Google({
+    GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
 
-    // --- Credentials Login (email + password) ---
+    FacebookProvider({
+      clientId: process.env.FACEBOOK_CLIENT_ID!,
+      clientSecret: process.env.FACEBOOK_CLIENT_SECRET!,
+    }),
+
+    // --- Credentials Login (email + password + recaptcha) ---
     Credentials({
       name: "credentials",
       credentials: {
-        email: {},
-        password: {},
+        email: { label: "Email", type: "text" },
+        password: { label: "Password", type: "password" },
+        recaptchaToken: { label: "Recaptcha Token", type: "text" }, // Tambahkan field ini
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials.password) return null;
 
+        // --- 2. Lakukan Verifikasi reCAPTCHA ---
+        // Kita cek apakah token dikirim (frontend harus mengirimnya)
+        if (!credentials.recaptchaToken) {
+          throw new Error("Missing reCAPTCHA token");
+        }
+
+        const isHuman = await verifyRecaptcha(credentials.recaptchaToken as string);
+        
+        if (!isHuman) {
+          throw new Error("reCAPTCHA validation failed. Are you a robot?");
+        }
+
+        // --- 3. Lanjut ke Logika Login Biasa ---
         const user = await prisma.user.findUnique({
           where: { email: credentials.email },
         });
@@ -66,7 +115,6 @@ const handler = NextAuth({
 
   callbacks: {
     async jwt({ token, user, account }) {
-      // console.log("JWT Callback", { user: !!user, token: !!token });
       if (user) {
         token.user = user;
 
@@ -121,7 +169,6 @@ const handler = NextAuth({
     },
     async session({ session, token }) {
       if (!token || !token.accessToken) {
-        // No token present on the session request — treat as unauthorized.
         throw new Error('No access token');
       }
 
@@ -136,7 +183,7 @@ const handler = NextAuth({
             where: { accessToken: token.accessToken as string }
           });
 
-          console.log("Session check:", { found: !!dbSession });
+          // console.log("Session check:", { found: !!dbSession });
 
           if (!dbSession || dbSession.expiresAt < new Date()) {
             throw new Error("Session expired or invalid");

@@ -1,0 +1,17 @@
+.next
+node_modules
+npm-debug.log
+.env.local
+.env.test
+.git
+.gitignore
+dist
+coverage
+logs
+tmp
+*.log
+*.sqlite
+/.idea
+/.vscode
+DS_Store
+docker-compose*.yml

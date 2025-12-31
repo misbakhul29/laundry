@@ -276,9 +276,8 @@ export default function Reminder() {
                         </div>
                     </div>
 
-                    <p className="mt-3 text-xs text-gray-400">
-                        Note: browser notifications require permission and will show while this page is open. For
-                        background delivery, use the service worker / server push.
+                    <p className="mt-3 text-xs text-gray-300">
+                        Note: browser notifications require permission and will show while this page is open.
                     </p>
                 </div>
             </div>

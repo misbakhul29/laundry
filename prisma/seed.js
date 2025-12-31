@@ -1,4 +1,5 @@
-import { PrismaClient } from '@prisma/client/wasm';
+import { PrismaClient } from "../lib/generated/prisma/client";
+
 const prisma = new PrismaClient();
 
 async function main() {
